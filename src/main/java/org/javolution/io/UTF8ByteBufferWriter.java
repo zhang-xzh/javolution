@@ -17,12 +17,12 @@ import java.nio.ByteBuffer;
  * <p> A UTF-8 <code>java.nio.ByteBuffer</code> writer.</p>
  *
  * <p> This writer supports surrogate <code>char</code> pairs (representing
- *     characters in the range [U+10000 .. U+10FFFF]). It can also be used
+ *     characters in the range [U+10000. U+10FFFF]). It can also be used
  *     to write characters from their unicodes (31 bits) directly
  *     (ref. {@link #write(int)}).</p>
  *
  * <p> Instances of this class can be reused for different output streams
- *     and can be part of a higher level component (e.g. serializer) in order
+ *     and can be part of a higher level component (e.g., serializer)
  *     to avoid dynamic buffer allocation when the destination output changes.
  *     Also wrapping using a <code>java.io.BufferedWriter</code> is unnescessary
  *     as instances of this class embed their own data buffers.</p>
@@ -34,6 +34,7 @@ import java.nio.ByteBuffer;
  * @version 2.0, December 9, 2004
  * @see     UTF8ByteBufferReader
  */
+@SuppressWarnings("unused")
 public final class UTF8ByteBufferWriter extends Writer {
 
     /**
@@ -55,7 +56,7 @@ public final class UTF8ByteBufferWriter extends Writer {
 		_byteBuffer = byteBuffer;
 	}
 	
-	protected ByteBuffer getOutput(){
+	private ByteBuffer getOutput(){
 		return _byteBuffer;
 	}
 	
@@ -64,7 +65,7 @@ public final class UTF8ByteBufferWriter extends Writer {
      *
      * @param  byteBuffer the destination byte buffer.
      * @return this UTF-8 writer.
-     * @throws IllegalStateException if this writer is being reused and 
+     * @throws IllegalStateException if this writer is being reused, and
      *         it has not been {@link #close closed} or {@link #reset reset}.
      */
     public UTF8ByteBufferWriter setOutput(ByteBuffer byteBuffer) {
@@ -101,7 +102,7 @@ public final class UTF8ByteBufferWriter extends Writer {
     /**
      * Writes a character given its 31-bits Unicode.
      *
-     * @param  code the 31 bits Unicode of the character to be written.
+     * @param  code the 31-bit Unicode of the character to be written.
      * @throws IOException if an I/O error occurs.
      */
     public void write(int code) throws IOException {
@@ -223,9 +224,8 @@ public final class UTF8ByteBufferWriter extends Writer {
     /**
      * Closes and {@link #reset resets} this writer for reuse.
      *
-     * @throws IOException if an I/O error occurs
      */
-    public void close() throws IOException {
+    public void close() {
         if (_byteBuffer != null) {
             reset();
         }

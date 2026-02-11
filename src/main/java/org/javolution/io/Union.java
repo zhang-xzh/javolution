@@ -36,6 +36,7 @@ package org.javolution.io;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 1.0, October 4, 2004
  */
+@SuppressWarnings("unused")
 public abstract class Union extends Struct {
 
     /**

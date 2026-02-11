@@ -14,11 +14,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.javolution.annotations.Realtime;
-import org.javolution.context.LocalContext;
-import org.javolution.lang.MathLib;
-import org.javolution.text.TextBuilder;
-
 /**
  * <p> Equivalent to a  <code>C/C++ struct</code>; this class confers
  *     interoperability between Java classes and C/C++ struct.</p>
@@ -32,7 +27,7 @@ import org.javolution.text.TextBuilder;
  *     {@link Struct}'s {@link Member members} and follows the same wordSize
  *      rules as <code>C/C++ structs</code>.</p>
  *
- * <p> This class (as well as the {@link Union} sub-class) facilitates:</p>
+ * <p> This class (as well as the {@link Union} subclass) facilitates:</p>
  *     <ul>
  *     <li> Memory sharing between Java applications and native libraries.</li>
  *     <li> Direct encoding/decoding of streams for which the structure
@@ -153,20 +148,15 @@ import org.javolution.text.TextBuilder;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.5.1, April 1, 2010
  */
-@SuppressWarnings("unchecked")
-@Realtime
+@SuppressWarnings({"unchecked", "unused", "UnusedReturnValue"})
 public class Struct {
 
     /**
      * Configurable holding the maximum wordSize in bytes
      * (default <code>4</code>). Should be a value greater or equal to 1.
      */
-    public static final LocalContext.Parameter<Integer> MAXIMUM_ALIGNMENT = new LocalContext.Parameter<Integer>() {
-        @Override
-        protected Integer getDefault() {
-            return 4;
-        }
-    };
+    @SuppressWarnings("unused")
+    public static final int MAXIMUM_ALIGNMENT = 4;
 
     /**
      * Holds the outer struct if any.
@@ -397,17 +387,9 @@ public class Struct {
      * @see    Reference64
      */
     public final long address() {
-        try {
-            Class<?> dbClass = Class.forName("sun.nio.ch.DirectBuffer");
-            java.lang.reflect.Method address = dbClass.getDeclaredMethod(
-                    "address", new Class[0]);
-            return ((Long) address.invoke(this.getByteBuffer(),
-                    (Object[]) null)).longValue();
-        } catch (Throwable error) {
-            error.printStackTrace();
-            throw new UnsupportedOperationException(
-                    "Method Struct.address() not supported on this platform.");
-        }
+        throw new UnsupportedOperationException(
+                "Struct.address() is not supported in this trimmed pure-Java transport build. " +
+                "Use getByteBuffer()/read()/write() and parse bytes on the native side.");
     }
 
     /**
@@ -423,15 +405,16 @@ public class Struct {
      *     student.year.set(2003);
      *     student.grade.set(12.5f);
      *     System.out.println(student);
-     *
+     * <p>
      *     4A 6F 68 6E 20 44 6F 65 00 00 00 00 00 00 00 00
      *     07 D3 00 00 41 48 00 00[/code]
      *
      * @return a hexadecimal representation of the bytes content for this
      *         struct.
      */
+    @Override
     public String toString() {
-        TextBuilder tmp = new TextBuilder();
+        StringBuilder tmp = new StringBuilder();
         final int size = size();
         final ByteBuffer buffer = getByteBuffer();
         final int start = getByteBufferPosition();
@@ -447,9 +430,8 @@ public class Struct {
     private static final char[] HEXA = { '0', '1', '2', '3', '4', '5', '6',
             '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
-    ///////////////////
     // CONFIGURATION //
-    ///////////////////
+
     /**
      * Indicates if this struct's members are mapped to the same location
      * in memory (default <code>false</code>). This method is useful for
@@ -530,7 +512,7 @@ public class Struct {
         Member inner = new Member(struct.size() << 3, struct._alignment); // Update indexes.
         struct._outer = this;
         struct._outerOffset = inner.offset();
-        return (S) struct;
+        return struct;
     }
 
     /**
@@ -560,18 +542,16 @@ public class Struct {
                         String structName = arrayName.substring(2,
                                 arrayName.length() - 1);
                         structClass = Class.forName(structName);
-                        if (structClass == null) { throw new IllegalArgumentException(
-                                "Struct class: " + structName + " not found"); }
                     }
-                    struct = (S) structClass.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
+                    struct = (S) structClass.getDeclaredConstructor().newInstance();
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException("Failed to instantiate struct component: " + structClass, e);
                 }
             }
             structs[i++] = inner(struct);
         }
         _resetIndex = resetIndexSaved;
-        return (S[]) structs;
+        return structs;
     }
 
     /**
@@ -591,20 +571,20 @@ public class Struct {
             _index = 0;
             _resetIndex = false; // Ensures the array elements are sequential.
         }
-        for (int i = 0; i < structs.length; i++) {
-            array(structs[i]);
+        for (S[] struct : structs) {
+            array(struct);
         }
         _resetIndex = resetIndexSaved;
-        return (S[][]) structs;
+        return structs;
     }
 
     /**
-     * Defines the specified three dimensional array of structs as inner
+     * Defines the specified three-dimensional array of structs as inner
      * structs. The array is populated if necessary using the struct component
      * default constructor (which must be public).
      *
      * @param <S> Type of the Struct Array
-     * @param structs the three dimensional struct array.
+     * @param structs the three-dimensional struct array.
      * @return the specified struct array.
      * @throws IllegalArgumentException if the specified array contains
      *         inner structs.
@@ -615,11 +595,11 @@ public class Struct {
             _index = 0;
             _resetIndex = false; // Ensures the array elements are sequential.
         }
-        for (int i = 0; i < structs.length; i++) {
-            array(structs[i]);
+        for (S[][] struct : structs) {
+            array(struct);
         }
         _resetIndex = resetIndexSaved;
-        return (S[][][]) structs;
+        return structs;
     }
 
     /**
@@ -685,28 +665,19 @@ public class Struct {
                             + "contain the member instances instead of null");
         }
         _resetIndex = resetIndexSaved;
-        return (M[]) arrayMember;
+        return arrayMember;
     }
 
-    private static final Class<? extends Bool[]> BOOL = new Bool[0].getClass();
-    private static final Class<? extends Signed8[]> SIGNED_8 = new Signed8[0]
-            .getClass();
-    private static final Class<? extends Unsigned8[]> UNSIGNED_8 = new Unsigned8[0]
-            .getClass();
-    private static final Class<? extends Signed16[]> SIGNED_16 = new Signed16[0]
-            .getClass();
-    private static final Class<? extends Unsigned16[]> UNSIGNED_16 = new Unsigned16[0]
-            .getClass();
-    private static final Class<? extends Signed32[]> SIGNED_32 = new Signed32[0]
-            .getClass();
-    private static final Class<? extends Unsigned32[]> UNSIGNED_32 = new Unsigned32[0]
-            .getClass();
-    private static final Class<? extends Signed64[]> SIGNED_64 = new Signed64[0]
-            .getClass();
-    private static final Class<? extends Float32[]> FLOAT_32 = new Float32[0]
-            .getClass();
-    private static final Class<? extends Float64[]> FLOAT_64 = new Float64[0]
-            .getClass();
+    private static final Class<? extends Bool[]> BOOL = Bool[].class;
+    private static final Class<? extends Signed8[]> SIGNED_8 = Signed8[].class;
+    private static final Class<? extends Unsigned8[]> UNSIGNED_8 = Unsigned8[].class;
+    private static final Class<? extends Signed16[]> SIGNED_16 = Signed16[].class;
+    private static final Class<? extends Unsigned16[]> UNSIGNED_16 = Unsigned16[].class;
+    private static final Class<? extends Signed32[]> SIGNED_32 = Signed32[].class;
+    private static final Class<? extends Unsigned32[]> UNSIGNED_32 = Unsigned32[].class;
+    private static final Class<? extends Signed64[]> SIGNED_64 = Signed64[].class;
+    private static final Class<? extends Float32[]> FLOAT_32 = Float32[].class;
+    private static final Class<? extends Float64[]> FLOAT_64 = Float64[].class;
 
     /**
      * Defines the specified two-dimensional array member. For predefined
@@ -725,11 +696,11 @@ public class Struct {
             _index = 0;
             _resetIndex = false; // Ensures the array elements are sequential.
         }
-        for (int i = 0; i < arrayMember.length; i++) {
-            array(arrayMember[i]);
+        for (M[] ms : arrayMember) {
+            array(ms);
         }
         _resetIndex = resetIndexSaved;
-        return (M[][]) arrayMember;
+        return arrayMember;
     }
 
     /**
@@ -749,11 +720,11 @@ public class Struct {
             _index = 0;
             _resetIndex = false; // Ensures the array elements are sequential.
         }
-        for (int i = 0; i < arrayMember.length; i++) {
-            array(arrayMember[i]);
+        for (M[][] ms : arrayMember) {
+            array(ms);
         }
         _resetIndex = resetIndexSaved;
-        return (M[][][]) arrayMember;
+        return arrayMember;
     }
 
     /**
@@ -785,7 +756,7 @@ public class Struct {
      * @param  bitSize the number of bits.
      * @return the specified bits read as a signed long.
      * @throws IllegalArgumentException if
-     *         {@code(bitOffset + bitSize - 1) / 8 >= this.size()}
+     *         { {@code @code(bitOffset}  + bitSize - 1) / 8 >= this.size() }
      */
     public long readBits(int bitOffset, int bitSize) {
         if ((bitOffset + bitSize - 1) >> 3 >= this.size()) throw new IllegalArgumentException(
@@ -837,7 +808,7 @@ public class Struct {
      * @param  bitOffset the bit start position in the Struct.
      * @param  bitSize the number of bits.
      * @throws IllegalArgumentException if
-     *         {@code(bitOffset + bitSize - 1) / 8 >= this.size()}
+     *         { {@code @code(bitOffset}  + bitSize - 1) / 8 >= this.size() }
      */
     public void writeBits(long value, int bitOffset, int bitSize) {
         if ((bitOffset + bitSize - 1) >> 3 >= this.size()) throw new IllegalArgumentException(
@@ -892,9 +863,8 @@ public class Struct {
         }
     }
 
-    /////////////
     // MEMBERS //
-    /////////////
+
     /**
      * This inner class represents the base class for all {@link Struct}
      * members. It allows applications to define additional member types.
@@ -928,7 +898,7 @@ public class Struct {
 
         /**
          * Base constructor for custom member types.
-         *
+         * <p>
          * The word size can be zero, in which case the {@link #offset}
          * of the member does not change, only {@link #bitIndex} is
          * incremented.
@@ -959,7 +929,7 @@ public class Struct {
                 while (_bitsUsed > (_wordSize << 3)) {
                     _index++;
                     _wordSize++;
-                    _length = MathLib.max(_length, _index);
+                    _length = Math.max(_length, _index);
                 }
                 return; // Bit field merge done.
             }
@@ -984,10 +954,10 @@ public class Struct {
             _bitIndex = 0;
 
             // Update struct indices.
-            _index += MathLib.max(wordSize, (bitLength + 7) >> 3);
+            _index += Math.max(wordSize, (bitLength + 7) >> 3);
             _wordSize = wordSize;
             _bitsUsed = bitLength;
-            _length = MathLib.max(_length, _index);
+            _length = Math.max(_length, _index);
             // size and index may differ because of {@link Union}
         }
 
@@ -1052,7 +1022,7 @@ public class Struct {
             return (word & ~mask) | (value & mask);
         }
 
-        // Returns the member long value.
+        // Returns the member-long value.
         final long get(int wordSize, long word) {
             final int shift = (byteOrder() == ByteOrder.BIG_ENDIAN) ? (wordSize << 3)
                     - bitIndex() - bitLength()
@@ -1062,7 +1032,7 @@ public class Struct {
             return word & mask;
         }
 
-        // Sets the member long value.
+        // Sets the member-long value.
         final long set(long value, int wordSize, long word) {
             final int shift = (byteOrder() == ByteOrder.BIG_ENDIAN) ? (wordSize << 3)
                     - bitIndex() - bitLength()
@@ -1074,9 +1044,8 @@ public class Struct {
         }
     }
 
-    ///////////////////////
     // PREDEFINED FIELDS //
-    ///////////////////////
+
     /**
      * This class represents a UTF-8 character string, null terminated
      * (for C/C++ compatibility)
@@ -1118,7 +1087,7 @@ public class Struct {
         public String get() {
             final ByteBuffer buffer = getByteBuffer();
             synchronized (buffer) {
-                TextBuilder tmp = new TextBuilder();
+                StringBuilder tmp = new StringBuilder();
                 try {
                     int index = getByteBufferPosition() + offset();
                     buffer.position(index);
@@ -1554,7 +1523,7 @@ public class Struct {
     }
 
     /**
-     * <p> This class represents a 64 bits reference (C/C++ pointer) to
+     * <p> This class represents a 64-bit reference (C/C++ pointer) to
      *     a {@link Struct} object (other types may require a {@link Struct}
      *     wrapper).</p>
      * <p> Note: For references which can be externally modified, an application
@@ -1575,7 +1544,7 @@ public class Struct {
             final int index = getByteBufferPosition() + offset();
             if (struct != null) {
                 getByteBuffer().putLong(index, struct.address());
-            } else if (struct == null) {
+            } else {
                 getByteBuffer().putLong(index, 0L);
             }
             _struct = struct;

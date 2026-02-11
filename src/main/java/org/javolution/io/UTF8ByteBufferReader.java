@@ -23,19 +23,20 @@ import java.nio.ByteBuffer;
  *     messaging (no intermediate buffer), etc.</p>
  *     
  * <p> This reader supports surrogate <code>char</code> pairs (representing
- *     characters in the range [U+10000 .. U+10FFFF]). It can also be used
+ *     characters in the range [U+10000. U+10FFFF]). It can also be used
  *     to read characters unicodes (31 bits) directly
  *     (ref. {@link #read()}).</p>
  *
  * <p> Each invocation of one of the <code>read()</code> methods may cause one
  *     or more bytes to be read from the underlying byte buffer.
- *     The end of stream is reached when the byte buffer position and limit
+ *     The end of the stream is reached when the byte buffer position and limit
  *     coincide.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 2.0, December 9, 2004
  * @see     UTF8ByteBufferWriter
  */
+@SuppressWarnings("unused")
 public final class UTF8ByteBufferReader extends Reader {
 
     /**
@@ -63,7 +64,7 @@ public final class UTF8ByteBufferReader extends Reader {
      *
      * @param  byteBuffer the <code>ByteBuffer</code> source.
      * @return this UTF-8 reader.
-     * @throws IllegalStateException if this reader is being reused and 
+     * @throws IllegalStateException if this reader is being reused, and
      *         it has not been {@link #close closed} or {@link #reset reset}.
      */
     public UTF8ByteBufferReader setInput(ByteBuffer byteBuffer) {
@@ -91,9 +92,8 @@ public final class UTF8ByteBufferReader extends Reader {
     /**
      * Closes and {@link #reset resets} this reader for reuse.
      *
-     * @throws IOException if an I/O error occurs.
      */
-    public void close() throws IOException {
+    public void close() {
         if (_byteBuffer != null) {
             reset();
         }
@@ -103,9 +103,9 @@ public final class UTF8ByteBufferReader extends Reader {
      * Reads a single character.  This method does not block, <code>-1</code>
      * is returned if the buffer's limit has been reached.
      *
-     * @return the 31-bits Unicode of the character read, or -1 if there is 
+     * @return the 31-bits Unicode of the character read, or -1 if there are
      *         no more remaining bytes to be read.
-     * @throws IOException if an I/O error occurs (e.g. incomplete 
+     * @throws IOException if an I/O error occurs (e.g., incomplete
      *         character sequence being read).
      */
     public int read() throws IOException {
@@ -183,8 +183,8 @@ public final class UTF8ByteBufferReader extends Reader {
      * @param  cbuf the destination buffer.
      * @param  off the offset at which to start storing characters.
      * @param  len the maximum number of characters to read
-     * @return the number of characters read, or -1 if there is no more 
-     *         byte remaining.
+     * @return the number of characters read, or -1 if there are no more
+     *         bytes remaining.
      * @throws IOException if an I/O error occurs.
      */
     public int read(char cbuf[], int off, int len) throws IOException {

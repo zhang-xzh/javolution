@@ -1,7 +1,6 @@
 /**
-<p> Utility classes for input and output such as 
-    {@link javolution.io.Struct Struct} and {@link javolution.io.Union Union}
-    for direct interoperability with C/C++.</p>
+ * <p>Utility classes for input and output such as
+ * {@link org.javolution.io.Struct Struct} and {@link org.javolution.io.Union Union}
+ * for direct interoperability with C/C++.</p>
  */
 package org.javolution.io;
-
