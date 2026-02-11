@@ -63,11 +63,10 @@ import java.nio.ByteOrder;
  *     public final Unsigned8 day   = new Unsigned8();
  * }
  * public static class Student extends Struct {
- *     public final Enum32<Gender>       gender = new Enum32<Gender>(Gender.values());
- *     public final UTF8String           name   = new UTF8String(64);
- *     public final Date                 birth  = inner(new Date());
- *     public final Float32[]            grades = array(new Float32[10]);
- *     public final Reference32<Student> next   =  new Reference32<Student>();
+ *     public final Enum32<Gender> gender = new Enum32<>(Gender.values());
+ *     public final UTF8String name = new UTF8String(64);
+ *     public final Date birth = inner(new Date());
+ *     public final Float32[] grades = array(new Float32[10]);
  * }[/code]
  * <p> Struct's members are directly accessible:
  * {@code
@@ -374,22 +373,6 @@ public class Struct {
                 out.write(_bytes);
             }
         }
-    }
-
-    /**
-     * Returns this struct address (if supported by the platform). 
-     * This method allows for structs to be referenced (e.g. pointer) 
-     * from other structs. 
-     *
-     * @return the struct memory address.
-     * @throws UnsupportedOperationException if not supported by the platform.
-     * @see    Reference32
-     * @see    Reference64
-     */
-    public final long address() {
-        throw new UnsupportedOperationException(
-                "Struct.address() is not supported in this trimmed pure-Java transport build. " +
-                "Use getByteBuffer()/read()/write() and parse bytes on the native side.");
     }
 
     /**
@@ -1472,100 +1455,6 @@ public class Struct {
 
         public String toString() {
             return String.valueOf(this.get());
-        }
-    }
-
-    /**
-     * <p> This class represents a 32 bits reference (C/C++ pointer) to
-     *     a {@link Struct} object (other types may require a {@link Struct}
-     *     wrapper).</p>
-     * <p> Note: For references which can be externally modified, an application
-     *           may want to check the {@link #isUpToDate up-to-date} status of
-     *           the reference. For out-of-date references, a {@link Struct}
-     *           can be created at the address specified by {@link #value}
-     *           (using JNI) and the reference {@link #set set} accordingly.</p>
-     */
-    public class Reference32<S extends Struct> extends Member {
-
-        private S _struct;
-
-        public Reference32() {
-            super(32, 4);
-        }
-
-        public void set(S struct) {
-            final int index = getByteBufferPosition() + offset();
-            if (struct != null) {
-                getByteBuffer().putInt(index, (int) struct.address());
-            } else {
-                getByteBuffer().putInt(index, 0);
-            }
-            _struct = struct;
-        }
-
-        public S get() {
-            return _struct;
-        }
-
-        public int value() {
-            final int index = getByteBufferPosition() + offset();
-            return getByteBuffer().getInt(index);
-        }
-
-        public boolean isUpToDate() {
-            final int index = getByteBufferPosition() + offset();
-            if (_struct != null) {
-                return getByteBuffer().getInt(index) == (int) _struct.address();
-            } else {
-                return getByteBuffer().getInt(index) == 0;
-            }
-        }
-    }
-
-    /**
-     * <p> This class represents a 64-bit reference (C/C++ pointer) to
-     *     a {@link Struct} object (other types may require a {@link Struct}
-     *     wrapper).</p>
-     * <p> Note: For references which can be externally modified, an application
-     *           may want to check the {@link #isUpToDate up-to-date} status of
-     *           the reference. For out-of-date references, a new {@link Struct}
-     *           can be created at the address specified by {@link #value}
-     *           (using JNI) and then {@link #set set} to the reference.</p>
-     */
-    public class Reference64<S extends Struct> extends Member {
-
-        private S _struct;
-
-        public Reference64() {
-            super(64, 8);
-        }
-
-        public void set(S struct) {
-            final int index = getByteBufferPosition() + offset();
-            if (struct != null) {
-                getByteBuffer().putLong(index, struct.address());
-            } else {
-                getByteBuffer().putLong(index, 0L);
-            }
-            _struct = struct;
-        }
-
-        public S get() {
-            return _struct;
-        }
-
-        public long value() {
-            final int index = getByteBufferPosition() + offset();
-            return getByteBuffer().getLong(index);
-        }
-
-        public boolean isUpToDate() {
-            final int index = getByteBufferPosition() + offset();
-            if (_struct != null) {
-                return getByteBuffer().getLong(index) == _struct.address();
-            } else {
-                return getByteBuffer().getLong(index) == 0L;
-            }
         }
     }
 
