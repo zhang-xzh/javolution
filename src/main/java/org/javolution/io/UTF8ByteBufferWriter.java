@@ -14,21 +14,16 @@ import java.io.Writer;
 import java.nio.ByteBuffer;
 
 /**
- * <p> A UTF-8 <code>java.nio.ByteBuffer</code> writer.</p>
+ * <p> 一个 UTF-8 <code>java.nio.ByteBuffer</code> 写入器（Writer）。</p>
  *
- * <p> This writer supports surrogate <code>char</code> pairs (representing
- *     characters in the range [U+10000. U+10FFFF]). It can also be used
- *     to write characters from their unicodes (31 bits) directly
- *     (ref. {@link #write(int)}).</p>
+ * <p> 此写入器支持代理 <code>char</code> 对（表示 [U+10000. U+10FFFF] 范围内的字符）。
+ *     它也可用于直接从字符的 Unicode（31 位）进行写入（参考 {@link #write(int)}）。</p>
  *
- * <p> Instances of this class can be reused for different output streams
- *     and can be part of a higher level component (e.g., serializer)
- *     to avoid dynamic buffer allocation when the destination output changes.
- *     Also wrapping using a <code>java.io.BufferedWriter</code> is unnescessary
- *     as instances of this class embed their own data buffers.</p>
+ * <p> 此类的实例可以重复用于不同的输出流，并且可以作为更高级别组件（例如序列化器）的一部分，
+ *     以避免在目标输出更改时进行动态缓冲区分配。
+ *     此外，由于此类的实例嵌入了自己的数据缓冲区，因此无需使用 <code>java.io.BufferedWriter</code> 进行包装。</p>
  * 
- * <p> Note: This writer is unsynchronized and always produces well-formed
- *           UTF-8 sequences.</p>
+ * <p> 注意：此写入器是未同步的，并且始终生成格式良好的 UTF-8 序列。</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 2.0, December 9, 2004
@@ -38,19 +33,19 @@ import java.nio.ByteBuffer;
 public final class UTF8ByteBufferWriter extends Writer {
 
     /**
-     * Holds the byte buffer destination.
+     * 持有目标字节缓冲区。
      */
     private ByteBuffer _byteBuffer;
 
     /**
-     * Default constructor.
+     * 默认构造函数。
      */
     public UTF8ByteBufferWriter() {}
 
     /**
-	 * Constructor to Provide a Byte Buffer on Initialization
+	 * 在初始化时提供字节缓冲区的构造函数。
 	 *
-	 * @param byteBuffer Byte Buffer to use for Writing
+	 * @param byteBuffer 用于写入的字节缓冲区
 	 */
 	public UTF8ByteBufferWriter(final ByteBuffer byteBuffer) {
 		_byteBuffer = byteBuffer;
@@ -61,12 +56,12 @@ public final class UTF8ByteBufferWriter extends Writer {
 	}
 	
     /**
-     * Sets the byte buffer to use for writing until this writer is closed.
+     * 设置用于写入的字节缓冲区，直到此写入器关闭。
      *
-     * @param  byteBuffer the destination byte buffer.
-     * @return this UTF-8 writer.
-     * @throws IllegalStateException if this writer is being reused, and
-     *         it has not been {@link #close closed} or {@link #reset reset}.
+     * @param  byteBuffer 目标字节缓冲区。
+     * @return 此 UTF-8 写入器。
+     * @throws IllegalStateException 如果此写入器正在被重复使用，
+     *         且尚未 {@link #close 关闭} 或 {@link #reset 重置}。
      */
     public UTF8ByteBufferWriter setOutput(ByteBuffer byteBuffer) {
         if (_byteBuffer != null)
@@ -76,12 +71,10 @@ public final class UTF8ByteBufferWriter extends Writer {
     }
 
     /**
-     * Writes a single character. This method supports 16-bits
-     * character surrogates.
+     * 写入单个字符。此方法支持 16 位字符代理（surrogates）。
      *
-     * @param  c <code>char</code> the character to be written (possibly
-     *        a surrogate).
-     * @throws IOException if an I/O error occurs.
+     * @param  c 要写入的 <code>char</code> 字符（可能是代理项）。
+     * @throws IOException 如果发生 I/O 错误。
      */
     public void write(char c) throws IOException {
     	if(_byteBuffer == null)
@@ -100,10 +93,10 @@ public final class UTF8ByteBufferWriter extends Writer {
     private char _highSurrogate;
 
     /**
-     * Writes a character given its 31-bits Unicode.
+     * 写入给定其 31 位 Unicode 的字符。
      *
-     * @param  code the 31-bit Unicode of the character to be written.
-     * @throws IOException if an I/O error occurs.
+     * @param  code 要写入字符的 31 位 Unicode。
+     * @throws IOException 如果发生 I/O 错误。
      */
     public void write(int code) throws IOException {
     	if(_byteBuffer == null)
@@ -148,12 +141,12 @@ public final class UTF8ByteBufferWriter extends Writer {
     }
 
     /**
-     * Writes a portion of an array of characters.
+     * 写入字符数组的一部分。
      *
-     * @param  cbuf the array of characters.
-     * @param  off the offset from which to start writing characters.
-     * @param  len the number of characters to write.
-     * @throws IOException if an I/O error occurs.
+     * @param  cbuf 字符数组。
+     * @param  off 开始写入字符的偏移量。
+     * @param  len 要写入的字符数。
+     * @throws IOException 如果发生 I/O 错误。
      */
     public void write(char cbuf[], int off, int len) throws IOException {
     	if(_byteBuffer == null)
@@ -170,12 +163,12 @@ public final class UTF8ByteBufferWriter extends Writer {
     }
 
     /**
-     * Writes a portion of a string.
+     * 写入字符串的一部分。
      *
-     * @param  str a String.
-     * @param  off the offset from which to start writing characters.
-     * @param  len the number of characters to write.
-     * @throws IOException if an I/O error occurs
+     * @param  str 字符串。
+     * @param  off 开始写入字符的偏移量。
+     * @param  len 要写入的字符数。
+     * @throws IOException 如果发生 I/O 错误
      */
     public void write(String str, int off, int len) throws IOException {
     	if(_byteBuffer == null)
@@ -192,10 +185,10 @@ public final class UTF8ByteBufferWriter extends Writer {
     }
 
     /**
-     * Writes the specified character sequence.
+     * 写入指定的字符序列。
      *
-     * @param  csq the character sequence.
-     * @throws IOException if an I/O error occurs
+     * @param  csq 字符序列。
+     * @throws IOException 如果发生 I/O 错误
      */
     public void write(CharSequence csq) throws IOException {
     	if(_byteBuffer == null)
@@ -212,17 +205,16 @@ public final class UTF8ByteBufferWriter extends Writer {
     }
 
     /**
-     * Flushes the stream (this method has no effect, the data is 
-     * always directly written to the <code>ByteBuffer</code>).
+     * 刷新流（此方法没有任何效果，数据始终直接写入 <code>ByteBuffer</code>）。
      *
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException 如果发生 I/O 错误。
      */
     public void flush() throws IOException {
         if (_byteBuffer == null) { throw new IOException("Writer closed"); }
     }
 
     /**
-     * Closes and {@link #reset resets} this writer for reuse.
+     * 关闭并 {@link #reset 重置} 此写入器以供重复使用。
      *
      */
     public void close() {

@@ -9,28 +9,27 @@
 package org.javolution.io;
 
 /**
- * <p> Equivalent to <code>C/C++ union</code>; this class works in the same
- *     way as {@link Struct} (sub-class) except that all members are mapped
- *     to the same location in memory.</p>
- * <p> Here is an example of C union:
+ * <p> 等同于 <code>C/C++ union</code>；此类的工作方式与 {@link Struct}（子类）相同，
+ *     不同之处在于所有成员都映射到内存中的同一位置。</p>
+ * <p> 以下是 C 联合体的示例：
  * {@code
  * union Number {
  *     int   asInt;
  *     float asFloat;
  *     char  asString[12];
  * };}</p>
- * <p> And its Java equivalent:
+ * <p> 对应的 Java 等效类如下：
  * {@code
  * public class Number extends Union {
  *     Signed32   asInt    = new Signed32();
  *     Float32    asFloat  = new Float32();
  *     Utf8String asString = new Utf8String(12);
  * }}</p>
- *  <p> As for any {@link Struct}, fields are directly accessible:
+ *  <p> 与任何 {@link Struct} 一样，字段可以直接访问：
  *  {@code
  *  Number num = new Number();
  *  num.asInt.set(23);
- *  num.asString.set("23"); // Null terminated (C compatible)
+ *  num.asString.set("23"); // Null 终止（C 兼容）
  *  float f = num.asFloat.get();}</p>
  * 
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
@@ -40,12 +39,12 @@ package org.javolution.io;
 public abstract class Union extends Struct {
 
     /**
-     * Default constructor.
+     * 默认构造函数。
      */
     public Union() {}
 
     /**
-     * Returns <code>true</code>.
+     * 返回 <code>true</code>。
      * 
      * @return <code>true</code>
      */

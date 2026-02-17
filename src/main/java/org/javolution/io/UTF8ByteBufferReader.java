@@ -15,22 +15,17 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 /**
- * <p> A UTF-8 <code>java.nio.ByteBuffer</code> reader.
+ * <p> 一个 UTF-8 <code>java.nio.ByteBuffer</code> 读取器（Reader）。
  *     </p>
  *
- * <p> This reader can be used for efficient decoding of native byte 
- *     buffers (e.g. <code>MappedByteBuffer</code>), high-performance 
- *     messaging (no intermediate buffer), etc.</p>
+ * <p> 此读取器可用于对原生字节缓冲区（例如 <code>MappedByteBuffer</code>）进行高效解码、
+ *     高性能消息传递（无中间缓冲区）等。</p>
  *     
- * <p> This reader supports surrogate <code>char</code> pairs (representing
- *     characters in the range [U+10000. U+10FFFF]). It can also be used
- *     to read characters unicodes (31 bits) directly
- *     (ref. {@link #read()}).</p>
+ * <p> 此读取器支持代理 <code>char</code> 对（表示 [U+10000. U+10FFFF] 范围内的字符）。
+ *     它也可用于直接读取 Unicode 字符（31 位）（参考 {@link #read()}）。</p>
  *
- * <p> Each invocation of one of the <code>read()</code> methods may cause one
- *     or more bytes to be read from the underlying byte buffer.
- *     The end of the stream is reached when the byte buffer position and limit
- *     coincide.</p>
+ * <p> 每次调用 <code>read()</code> 方法都可能导致从底层字节缓冲区读取一个或多个字节。
+ *     当字节缓冲区的位置（position）和限制（limit）重合时，表示到达流的末尾。</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 2.0, December 9, 2004
@@ -40,32 +35,31 @@ import java.nio.ByteBuffer;
 public final class UTF8ByteBufferReader extends Reader {
 
     /**
-     * Holds the byte buffer source.
+     * 持有源字节缓冲区。
      */
     private ByteBuffer _byteBuffer;
 
     /**
-     * Default constructor.
+     * 默认构造函数。
      */
     public UTF8ByteBufferReader() {}
     
     /**
-     * Constructor for Initializing to Read from the Specified Byte Buffer
+     * 初始化为从指定字节缓冲区读取的构造函数。
      * 
-     * @param byteBuffer ByteBuffer to Read From
+     * @param byteBuffer 要从中读取的 ByteBuffer
      */
     public UTF8ByteBufferReader(ByteBuffer byteBuffer) {
     	_byteBuffer = byteBuffer;
     }
 
     /**
-     * Sets the <code>ByteBuffer</code> to use for reading available bytes
-     * from current buffer position.
+     * 设置 <code>ByteBuffer</code>，用于从当前缓冲区位置开始读取可用字节。
      *
-     * @param  byteBuffer the <code>ByteBuffer</code> source.
-     * @return this UTF-8 reader.
-     * @throws IllegalStateException if this reader is being reused, and
-     *         it has not been {@link #close closed} or {@link #reset reset}.
+     * @param  byteBuffer 源 <code>ByteBuffer</code>。
+     * @return 此 UTF-8 读取器。
+     * @throws IllegalStateException 如果此读取器正在被重复使用，
+     *         且尚未 {@link #close 关闭} 或 {@link #reset 重置}。
      */
     public UTF8ByteBufferReader setInput(ByteBuffer byteBuffer) {
         if (_byteBuffer != null)
@@ -75,11 +69,11 @@ public final class UTF8ByteBufferReader extends Reader {
     }
 
     /**
-     * Indicates if this stream is ready to be read.
+     * 指示此流是否已准备好被读取。
      *
-     * @return <code>true</code> if the byte buffer has remaining bytes to 
-     *         read; <code>false</code> otherwise.
-     * @throws  IOException if an I/O error occurs.
+     * @return 如果字节缓冲区还有剩余字节可读，则返回 <code>true</code>；
+     *         否则返回 <code>false</code>。
+     * @throws  IOException 如果发生 I/O 错误。
      */
     public boolean ready() throws IOException {
         if (_byteBuffer != null) {
@@ -90,7 +84,7 @@ public final class UTF8ByteBufferReader extends Reader {
     }
 
     /**
-     * Closes and {@link #reset resets} this reader for reuse.
+     * 关闭并 {@link #reset 重置} 此读取器以供重复使用。
      *
      */
     public void close() {
@@ -100,13 +94,10 @@ public final class UTF8ByteBufferReader extends Reader {
     }
 
     /**
-     * Reads a single character.  This method does not block, <code>-1</code>
-     * is returned if the buffer's limit has been reached.
+     * 读取单个字符。此方法不会阻塞，如果已达到缓冲区的限制，则返回 <code>-1</code>。
      *
-     * @return the 31-bits Unicode of the character read, or -1 if there are
-     *         no more remaining bytes to be read.
-     * @throws IOException if an I/O error occurs (e.g., incomplete
-     *         character sequence being read).
+     * @return 读取字符的 31 位 Unicode，如果没有更多可读字节，则返回 -1。
+     * @throws IOException 如果发生 I/O 错误（例如，读取到不完整的字符序列）。
      */
     public int read() throws IOException {
         if (_byteBuffer != null) {
@@ -174,18 +165,15 @@ public final class UTF8ByteBufferReader extends Reader {
     private int _moreBytes;
 
     /**
-     * Reads characters into a portion of an array.  This method does not 
-     * block.
+     * 将字符读取到数组的一部分中。此方法不会阻塞。
      *
-     * <p> Note: Characters between U+10000 and U+10FFFF are represented
-     *     by surrogate pairs (two <code>char</code>).</p>
+     * <p> 注意：U+10000 和 U+10FFFF 之间的字符由代理对（两个 <code>char</code>）表示。</p>
      *
-     * @param  cbuf the destination buffer.
-     * @param  off the offset at which to start storing characters.
-     * @param  len the maximum number of characters to read
-     * @return the number of characters read, or -1 if there are no more
-     *         bytes remaining.
-     * @throws IOException if an I/O error occurs.
+     * @param  cbuf 目标缓冲区。
+     * @param  off 开始存储字符的偏移量。
+     * @param  len 要读取的最大字符数
+     * @return 读取的字符数，如果没有更多字节剩余，则返回 -1。
+     * @throws IOException 如果发生 I/O 错误。
      */
     public int read(char cbuf[], int off, int len) throws IOException {
         if (_byteBuffer == null)
@@ -228,14 +216,12 @@ public final class UTF8ByteBufferReader extends Reader {
     }
 
     /**
-     * Reads characters into the specified appendable. This method does not 
-     * block.
+     * 将字符读取到指定的可追加对象（appendable）中。此方法不会阻塞。
      *
-     * <p> Note: Characters between U+10000 and U+10FFFF are represented
-     *     by surrogate pairs (two <code>char</code>).</p>
+     * <p> 注意：U+10000 和 U+10FFFF 之间的字符由代理对（两个 <code>char</code>）表示。</p>
      *
-     * @param  dest the destination buffer.
-     * @throws IOException if an I/O error occurs.
+     * @param  dest 目标缓冲区。
+     * @throws IOException 如果发生 I/O 错误。
      */
     public void read(Appendable dest) throws IOException {
         if (_byteBuffer == null)

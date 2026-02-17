@@ -1,6 +1,6 @@
 /**
- * <p>Utility classes for input and output such as
- * {@link org.javolution.io.Struct Struct} and {@link org.javolution.io.Union Union}
- * for direct interoperability with C/C++.</p>
+ * <p>输入输出工具类，例如
+ * {@link org.javolution.io.Struct Struct} 和 {@link org.javolution.io.Union Union}，
+ * 用于与 C/C++ 进行直接互操作。</p>
  */
 package org.javolution.io;
